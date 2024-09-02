@@ -18,7 +18,7 @@ public partial class MainWindow : Window
     private readonly Rectangle[,] highlights = new Rectangle[8,8];
     private readonly Dictionary<Position, Move> moveCache = new();
 
-    private GameStates gameStates;
+    private GameState gameStates;
     private Position? selectedPosition = null;
 
     public MainWindow()

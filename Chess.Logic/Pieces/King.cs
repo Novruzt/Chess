@@ -41,6 +41,15 @@ public class King:Piece
             yield return new NormalMove(from, to);
     }
 
+    public override bool CanCaptureOpponentKing(Position from, Board board)
+    {
+        return MovePosition(from, board).Any(to =>
+        {
+            Piece piece = board[to];
+            return piece != null && piece.Type== PieceType.King;
+        });
+    }
+
     private IEnumerable<Position> MovePosition(Position from, Board board)
     {
         foreach(Direction dir in directions)

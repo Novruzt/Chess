@@ -28,6 +28,57 @@ public class Board
         return board;
      }
 
+    public IEnumerable<Position> PiecePositions()
+    {
+        for(int row =  0; row < 8; row++)
+        {
+            for(int col = 0; col<8; col++)
+            {
+                Position pos = new Position(row, col);
+
+                if (!IsEmpty(pos))
+                {
+                    yield return pos;
+                }
+            }
+        }
+    }
+
+    public IEnumerable<Position> PiecePositionsForPlayer(Player player)
+    {
+        return PiecePositions().Where(pos => this[pos].Color == player);
+    }
+
+    public bool IsInCheck(Player player)
+    {
+        return PiecePositionsForPlayer(player.Opponent()).Any(pos =>
+        {
+            Piece piece = this[pos];
+            return piece.CanCaptureOpponentKing(pos, this);
+        });
+    }
+
+    public Board Copy()
+    {
+        Board copy = new();
+
+        foreach(Position pos in PiecePositions())
+        {
+            copy[pos] = this[pos].Copy();
+        }
+
+        return copy;
+    }
+
+    public static bool IsInside(Position pos)
+    {
+        return pos.Row >= 0 && pos.Row < 8 && pos.Column >= 0 && pos.Column < 8;
+    }
+
+    public bool IsEmpty(Position pos)
+    {
+        return this[pos] == null;
+    }
     private void AddStartPieces()
     {
 
@@ -58,15 +109,5 @@ public class Board
             this[1, i] = new Pawn(Player.Black);
             this[6, i] = new Pawn(Player.White);
         }
-    }
-
-    public static bool IsInside(Position pos)
-    {
-        return pos.Row>=0 && pos.Row<8 && pos.Column>=0 && pos.Column<8;
-    }
-
-    public bool IsEmpty(Position pos)
-    {
-        return this[pos] == null;
     }
 }

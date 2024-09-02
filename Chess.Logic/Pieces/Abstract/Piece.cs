@@ -12,6 +12,15 @@ public abstract class Piece
     public abstract Piece Copy();
     public abstract IEnumerable<Move> GetMoves(Position from, Board board);
 
+    public virtual bool CanCaptureOpponentKing(Position from, Board board)
+    {
+        return GetMoves(from, board).Any(move =>
+        {
+            Piece piece = board[move.To];
+            return piece != null && piece.Type==PieceType.King; 
+        });
+    }
+
     protected IEnumerable<Position> MovePositionInDirection(Position from, Board board, Direction dir)
     {
         for (Position pos = from + dir; Board.IsInside(pos); pos += dir)
