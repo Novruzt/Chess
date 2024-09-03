@@ -2,7 +2,7 @@
 public enum EndReason
 {
     None = 0,
-    CheckMate,
+    Checkmate,
     Stalemate,
     FiftyMove,
     InsufficientMaterial,

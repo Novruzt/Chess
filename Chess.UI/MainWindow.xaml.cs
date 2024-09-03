@@ -1,5 +1,6 @@
 ﻿using Chess.Logic;
 using Chess.Logic.Enums;
+using Chess.Logic.Moves;
 using Chess.Logic.Moves.Abstract;
 using Chess.Logic.Pieces.Abstract;
 using System.Windows;
@@ -18,7 +19,7 @@ public partial class MainWindow : Window
     private readonly Rectangle[,] highlights = new Rectangle[8,8];
     private readonly Dictionary<Position, Move> moveCache = new();
 
-    private GameState gameStates;
+    private GameState gameState;
     private Position? selectedPosition = null;
 
     public MainWindow()
@@ -26,10 +27,10 @@ public partial class MainWindow : Window
         InitializeComponent();
         InitalizeBoard();
 
-        gameStates = new(Player.White, Board.Inital());
-        DrawBoard(gameStates.Board);
+        gameState = new(Player.White, Board.Inital());
+        DrawBoard(gameState.Board);
 
-        SetCursor(gameStates.CurrentPlayer);
+        SetCursor(gameState.CurrentPlayer);
     }
 
     private void InitalizeBoard()
@@ -63,6 +64,10 @@ public partial class MainWindow : Window
 
     private void BoardGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+
+        if (IsMenuOnScreen())
+            return;
+
         Point point = e.GetPosition(BoardGrid);
 
         Position pos =ToSquarePosition(point);
@@ -85,7 +90,7 @@ public partial class MainWindow : Window
 
     private void OnFromPositionSelected(Position pos)
     {
-        IEnumerable<Move> moves = gameStates.LegalMovesForPiece(pos);
+        IEnumerable<Move> moves = gameState.LegalMovesForPiece(pos);
 
         if (moves.Any())
         {
@@ -102,10 +107,37 @@ public partial class MainWindow : Window
 
         if(moveCache.TryGetValue(pos, out Move move))
         {
-            gameStates.MakeMove(move);
-            DrawBoard(gameStates.Board);
-            SetCursor(gameStates.CurrentPlayer);
+            if (move.Type == MoveType.PawnPromotion)
+                HandlePromotion(move.From, move.To);
+            else
+                HandleMove(move); 
         }
+    }
+
+    private void HandlePromotion(Position from, Position to)
+    {
+        pieceImages[to.Row, to.Column].Source = Images.GetImage(gameState.CurrentPlayer, PieceType.Pawn);
+        pieceImages[from.Row, from.Column].Source = null;
+
+        PromotionMenu promotionMenu = new(gameState.CurrentPlayer);
+        MenuContainer.Content=promotionMenu;
+
+        promotionMenu.PieceSelected += type =>
+        {
+            MenuContainer.Content = null;
+            Move promotionMove = new PawnPromotion(from, to, type);
+            HandleMove(promotionMove);
+        };
+    }
+
+    private void HandleMove(Move move)
+    {
+        gameState.MakeMove(move);
+        DrawBoard(gameState.Board);
+        SetCursor(gameState.CurrentPlayer);
+
+        if (gameState.IsGameOver())
+            ShowGameOver();
     }
 
     private void CacheMoves(IEnumerable<Move> moves)
@@ -138,5 +170,37 @@ public partial class MainWindow : Window
             Cursor = ChessCursor.White;
         else 
             Cursor = ChessCursor.Black;
+    }
+
+    private bool IsMenuOnScreen()
+    {
+        return MenuContainer.Content != null;
+    }
+
+    private void ShowGameOver()
+    {
+        GameOverMenu gameOverMenu = new(gameState);
+        MenuContainer.Content = gameOverMenu;
+
+        gameOverMenu.OptionSelected += option =>
+        {
+            if (option == Option.Restart)
+            {
+                MenuContainer.Content = null;
+                RestartGame();
+            }
+            else
+                Application.Current.Shutdown();
+        };
+    }
+
+    private void RestartGame()
+    {
+        HideHighlights();
+        moveCache.Clear();
+        gameState = new(Player.White, Board.Inital());
+
+        DrawBoard(gameState.Board);
+        SetCursor(gameState.CurrentPlayer);
     }
 }

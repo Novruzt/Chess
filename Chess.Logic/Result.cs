@@ -14,7 +14,7 @@ public class Result
 
     public static Result Win(Player winner)
     {
-        return new(winner, EndReason.CheckMate);
+        return new(winner, EndReason.Checkmate);
     }
 
     public static Result Draw(EndReason reason)

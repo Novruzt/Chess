@@ -41,6 +41,14 @@ public class Pawn : Piece
         });
     }
 
+    private static IEnumerable<Move> PromotionMoves(Position from, Position to)
+    {
+        yield return new PawnPromotion(from, to, PieceType.Knight);
+        yield return new PawnPromotion(from, to, PieceType.Bishop);
+        yield return new PawnPromotion(from, to, PieceType.Rook);
+        yield return new PawnPromotion(from, to, PieceType.Queen);
+    }
+
     private bool CanMoveTo(Position pos, Board board)
     {
         return Board.IsInside(pos) && board.IsEmpty(pos);
@@ -60,7 +68,11 @@ public class Pawn : Piece
 
         if (CanMoveTo(oneMove, board))
         {
-            yield return new NormalMove(from, oneMove);
+            if(oneMove.Row==0 || oneMove.Row==7)
+                foreach(Move promotionMove in PromotionMoves(from, oneMove))
+                    yield return promotionMove;
+            else
+                yield return new NormalMove(from, oneMove);
 
             Position twoMove = oneMove + forward;
 
@@ -92,7 +104,11 @@ public class Pawn : Piece
 
             if(CanCaptureAt(to, board))
             {
-                yield return new NormalMove(from, to);
+                if (to.Row == 0 || to.Row == 7)
+                    foreach (Move promotionMove in PromotionMoves(from, to))
+                        yield return promotionMove;
+                else
+                    yield return new NormalMove(from, to);
             }
         }
     } 
