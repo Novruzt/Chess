@@ -1,6 +1,6 @@
 ﻿using Chess.Logic.Enums;
 
-namespace Chess.Logic;
+namespace Chess.Logic.GameEnds;
 public class Result
 {
     public Player Winner { get; set; }

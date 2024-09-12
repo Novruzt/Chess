@@ -38,6 +38,7 @@ public class Queen : Piece
 
     public override IEnumerable<Move> GetMoves(Position from, Board board)
     {
-        return MovePositionInDirections(from, board, directions).Select(to => new NormalMove(to, from));
+        var getMoves = MovePositionInDirections(from, board, directions).Select(to => new NormalMove(from, to));
+        return getMoves;
     }
 }

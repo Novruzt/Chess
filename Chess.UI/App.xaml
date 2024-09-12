@@ -29,7 +29,7 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="BorderThickness" Value="2"/>
             <Setter Property="BorderBrush" Value="{StaticResource StrokeColor}"/>
-            <Setter Property="Background" Value="{StaticResource Button Color}"/>
+            <Setter Property="Background" Value="{StaticResource ButtonColor}"/>
             <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
             
             <Style.Resources>

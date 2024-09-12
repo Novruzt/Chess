@@ -1,4 +1,5 @@
 ﻿using Chess.Logic.Enums;
+using Chess.Logic.Pieces.Abstract;
 
 namespace Chess.Logic.Moves.Abstract;
 public abstract class Move
@@ -7,11 +8,16 @@ public abstract class Move
     public abstract Position From { get; }
     public abstract Position To { get; }
 
-    public abstract void  Execute(Board board);
+    public abstract bool  Execute(Board board);
 
     public virtual bool IsLegal(Board board)
     {
-        Player player = board[From].Color;
+        Piece piece = board[From];
+
+        if(piece is null)
+            return false;
+
+        Player player = piece.Color;
         Board copy = board.Copy();
         Execute(copy);
 

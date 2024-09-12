@@ -1,6 +1,5 @@
 ﻿using Chess.Logic.Enums;
 using Chess.Logic.Moves.Abstract;
-using System.Runtime.InteropServices.Marshalling;
 
 namespace Chess.Logic.Pieces.Abstract;
 public abstract class Piece
@@ -42,7 +41,8 @@ public abstract class Piece
     }
 
     protected IEnumerable<Position> MovePositionInDirections(Position from, Board board, Direction[] dirs)
-    {
-        return dirs.SelectMany(dir=>MovePositionInDirection(from, board, dir));
+    { 
+        var directions = dirs.SelectMany(dir => MovePositionInDirection(from, board, dir));
+        return  directions;
     }
 }

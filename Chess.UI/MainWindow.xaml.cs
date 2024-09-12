@@ -3,9 +3,14 @@ using Chess.Logic.Enums;
 using Chess.Logic.Moves;
 using Chess.Logic.Moves.Abstract;
 using Chess.Logic.Pieces.Abstract;
+using Chess.Logic.States;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
+
+using Point = System.Windows.Point;
+using Color = System.Windows.Media.Color;
 
 using Rectangle = System.Windows.Shapes.Rectangle;
 
@@ -15,6 +20,8 @@ namespace Chess.UI;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private Position? redPositionInCheck = null;
+
     private readonly Image[,] pieceImages = new Image[8,8];
     private readonly Rectangle[,] highlights = new Rectangle[8,8];
     private readonly Dictionary<Position, Move> moveCache = new();
@@ -62,7 +69,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void BoardGrid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private void BoardGrid_MouseDown(object sender, MouseButtonEventArgs e)
     {
 
         if (IsMenuOnScreen())
@@ -76,6 +83,11 @@ public partial class MainWindow : Window
             OnFromPositionSelected(pos);
         else
             OnToPositionSelected(pos);
+
+        if (gameState.Board.IsInCheck(gameState.CurrentPlayer))
+            RedIfKingIsInCheck();
+        else
+            HideRed();
     }
 
     private Position ToSquarePosition(Point point)
@@ -86,6 +98,15 @@ public partial class MainWindow : Window
         int col = (int)(point.X / squareSize);  
 
         return new Position(row, col);
+    }
+
+    private Point PositionToPoint(Position pos)
+    {
+        double squareSize = BoardGrid.ActualWidth / 8;
+        double x = pos.Column * squareSize;
+        double y = pos.Row * squareSize;
+
+        return new Point(x, y);
     }
 
     private void OnFromPositionSelected(Position pos)
@@ -149,7 +170,26 @@ public partial class MainWindow : Window
             moveCache[move.To] = move;
         }
     }
+    #region RedKing
+    private Position? GetKingPosition()
+    {
+        return gameState.Board.GetKingPosition(gameState.CurrentPlayer);
+    }
+    private void RedIfKingIsInCheck()
+    {
+        redPositionInCheck = GetKingPosition(); 
+        Color color = Color.FromRgb(255, 0, 0);
 
+        if (redPositionInCheck is not null)
+            highlights[redPositionInCheck.Row, redPositionInCheck.Column].Fill = new SolidColorBrush(color);
+    }
+
+    private void HideRed()
+    {
+        if (redPositionInCheck is not null)
+            highlights[redPositionInCheck.Row, redPositionInCheck.Column].Fill = Brushes.Transparent;
+    }
+    #endregion
     private void ShowHighlights()
     {
         Color color = Color.FromArgb(150, 125, 255, 125);
@@ -196,11 +236,34 @@ public partial class MainWindow : Window
 
     private void RestartGame()
     {
+        selectedPosition = null;
         HideHighlights();
         moveCache.Clear();
         gameState = new(Player.White, Board.Inital());
 
         DrawBoard(gameState.Board);
         SetCursor(gameState.CurrentPlayer);
+    }
+
+    private void Window_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (!IsMenuOnScreen() && e.Key == Key.Escape)
+            ShowPauseMenu();
+    }
+
+    private void ShowPauseMenu()
+    {
+        PauseMenu pauseMenu = new();
+        MenuContainer.Content = pauseMenu;
+
+        pauseMenu.OptionSelected += option =>
+        {
+            MenuContainer.Content = null;
+
+            if (option == Option.Restart)
+            {
+                RestartGame();
+            }
+        }; 
     }
 }

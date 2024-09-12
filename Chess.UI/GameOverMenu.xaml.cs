@@ -1,5 +1,6 @@
-﻿using Chess.Logic;
-using Chess.Logic.Enums;
+﻿using Chess.Logic.Enums;
+using Chess.Logic.GameEnds;
+using Chess.Logic.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;

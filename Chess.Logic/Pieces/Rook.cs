@@ -31,6 +31,6 @@ public class Rook:Piece
 
     public override IEnumerable<Move> GetMoves(Position from, Board board)
     {
-        return MovePositionInDirections(from, board, directions).Select(to=>new NormalMove(to, from));
+        return MovePositionInDirections(from, board, directions).Select(to=>new NormalMove(from, to));
     }
 }
